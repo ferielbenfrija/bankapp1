@@ -1,81 +1,108 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Our Bank Application</title>
+    <link rel="icon" type="image/png" th:href="@{/logo.png}"> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-  </head>
-  <body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
 
-
-<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+<!-- Navigation améliorée -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
   <div class="container">
-    <a class="navbar-brand" href="#">Bank Application</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+      <img th:src="@{/logo.png}" alt="Bank Logo" class="me-2" style="height: 40px;">
+      <span class="fw-bold">BankApp</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+    <div class="collapse navbar-collapse" id="navbarContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link text-dark" href="#">Home</a>
+          <a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-dark" href="/contact">contact</a>
+          <a class="nav-link" href="/contact"><i class="fas fa-envelope me-1"></i> Contact</a>
         </li>
-       
-
-        
       </ul>
-     
-     <ul class="navbar-nav me-3" sec:authorize="isAuthenticated()">
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            User
-        </a>
-        <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/profile">Profile</a></li>
-            <li><a class="dropdown-item" href="/">Home</a></li>
-        </ul>
-    </li>
-</ul>
-     
-     
-     <form sec:authorize="isAuthenticated()" method="post" action="/logout">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-    <button type="submit" class="btn btn-danger">
-        Logout
-    </button>
-</form>
-     
-     
-     
-<ul class="navbar-nav" sec:authorize="!isAuthenticated()"> 
-  <li class="nav-item"> 
-    <a href="/register" class="btn btn-outline-primary me-2">Register</a> 
-  </li> 
-  <li class="nav-item"> 
-    <a href="/login" class="btn btn-primary">Login</a> 
-  </li> 
-</ul>
 
+      <!-- Utilisateur connecté -->
+      <div sec:authorize="isAuthenticated()" class="d-flex align-items-center">
+        <div class="dropdown me-3">
+          <a class="btn btn-outline-light dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-user-circle me-1"></i>
+            <span sec:authentication="name"></span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>Profile</a></li>
+			<li><a class="dropdown-item" href="/account/details"><i class="fas fa-wallet me-2"></i>Accounts</a></li>
+          </ul>
+        </div>
+        <form method="post" action="/logout">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-light">
+            <i class="fas fa-sign-out-alt me-1"></i> Logout
+          </button>
+        </form>
+      </div>
 
-
+      <!-- Utilisateur non connecté -->
+      <div sec:authorize="!isAuthenticated()" class="d-flex">
+        <a href="/register" class="btn btn-outline-light me-2">
+          <i class="fas fa-user-plus me-1"></i> Register
+        </a> 
+        <a href="/login" class="btn btn-light">
+          <i class="fas fa-sign-in-alt me-1"></i> Login
+        </a> 
+      </div>
     </div>
   </div>
 </nav>
 
-<div class="container py-5">
-        <h1 class="text-center">Welcome to your Bank application</h1>
+<!-- Contenu principal -->
+<main class="flex-grow-1">
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h1 class="display-5 fw-bold mb-4">Welcome to BankApp</h1>
+        <p class="lead mb-5">Your secure and reliable banking partner</p>
         
-     <div class="text-center mt-3" sec:authorize="isAuthenticated()">
-        <a th:href="@{/account/details}" class="btn btn-primary">
-            View Account Details
-        </a>
+        <div sec:authorize="!isAuthenticated()" class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+          <a href="/register" class="btn btn-primary btn-lg px-4 gap-3">Create account</a>
+          <a href="/login" class="btn btn-outline-primary btn-lg px-4">Sign in</a>
+        </div>
+        
+        <div sec:authorize="isAuthenticated()" class="mt-4">
+          <a th:href="@{/account/details}" class="btn btn-primary btn-lg px-4">
+            <i class="fas fa-wallet me-2"></i> View Accounts
+          </a>
+        </div>
+      </div>
     </div>
- </div>
-        
+  </div>
+</main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
-  </body>
+<!-- Pied de page amélioré -->
+<footer class="bg-dark text-white py-4 mt-auto">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 text-center text-md-start">
+        <p class="mb-0">&copy; 2025 BankApp. All rights reserved.</p>
+      </div>
+      <div class="col-md-6 text-center text-md-end">
+        <a href="/contact" class="text-white text-decoration-none me-3">Contact</a>
+        <a href="/privacy" class="text-white text-decoration-none">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
