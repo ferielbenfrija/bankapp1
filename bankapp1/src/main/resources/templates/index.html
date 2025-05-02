@@ -14,7 +14,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
   <div class="container">
     <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
-      <img th:src="@{/logo.png}" alt="Bank Logo" class="me-2" style="height: 40px;">
+      <img th:src="@{/logo.png}" alt="Bank Logo" class="me-2" style="height: 80px;">
       <span class="fw-bold">BankApp</span>
     </a>
 
@@ -82,7 +82,10 @@
           <a th:href="@{/account/details}" class="btn btn-primary btn-lg px-4">
             <i class="fas fa-wallet me-2"></i> View Accounts
           </a>
-        </div>
+         <a th:href="@{/account/history}" class="btn btn-outline-primary btn-lg px-4 ms-2">
+           <i class="fas fa-history me-2"></i> Historique
+         </a>
+        </div> 
       </div>
     </div>
   </div>

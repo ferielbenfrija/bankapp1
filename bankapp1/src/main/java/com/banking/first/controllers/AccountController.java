@@ -1,6 +1,7 @@
 package com.banking.first.controllers;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.banking.first.entities.AppUser;
 import com.banking.first.entities.Registerdto;
+import com.banking.first.entities.Transaction;
 import com.banking.first.repositories.UserRepository;
+import com.banking.first.services.TransactionService;
 
 import jakarta.validation.Valid;
 
@@ -24,6 +27,11 @@ import jakarta.validation.Valid;
 public class AccountController {
 	@Autowired
 private UserRepository repo;
+	@Autowired
+private com.banking.first.services.EmailService emailService;
+	@Autowired
+private TransactionService transactionService;
+
 
 @GetMapping("/register")
 public String register(Model model) {
@@ -84,23 +92,34 @@ public String showAccountDetails(Model model, @AuthenticationPrincipal org.sprin
 public String showDepositPage(Model model) {
     return "deposit";  // Affiche la page de dépôt
 }
-
 @PostMapping("/account/deposit")
-public String deposit(@RequestParam("amount") double amount, @AuthenticationPrincipal org.springframework.security.core.userdetails.User user, Model model) {
+public String deposit(@RequestParam("amount") double amount,
+                      @AuthenticationPrincipal org.springframework.security.core.userdetails.User user,
+                      Model model) {
     String email = user.getUsername();
     AppUser appUser = repo.findByEmail(email);
 
     if (amount > 0) {
-        appUser.setBalance(appUser.getBalance() + amount); // Ajoute l'argent au solde
+        appUser.setBalance(appUser.getBalance() + amount);
         repo.save(appUser);
+        
+        transactionService.addTransaction(appUser, "DEPOSIT", amount);
+
+
+        emailService.sendTransactionEmail(
+            appUser.getEmail(),
+            "Confirmation de dépôt",
+            "Bonjour " + appUser.getFirstname() + ",\n\nVous avez déposé " + amount + "€ sur votre compte.\nVotre nouveau solde est de " + appUser.getBalance() + "€."
+        );
+
         model.addAttribute("successMessage", "Dépôt effectué avec succès !");
     } else {
         model.addAttribute("errorMessage", "Le montant du dépôt doit être supérieur à zéro.");
     }
 
-    model.addAttribute("user", appUser);
-    return  "redirect:/account/details";
+    return "redirect:/account/details";
 }
+
 
 @GetMapping("/account/withdraw")
 public String showWithdrawPage(Model model) {
@@ -108,21 +127,43 @@ public String showWithdrawPage(Model model) {
 }
 
 @PostMapping("/account/withdraw")
-public String withdraw(@RequestParam("amount") double amount, @AuthenticationPrincipal org.springframework.security.core.userdetails.User user, Model model) {
+public String withdraw(@RequestParam("amount") double amount,
+                       @AuthenticationPrincipal org.springframework.security.core.userdetails.User user,
+                       Model model) {
     String email = user.getUsername();
     AppUser appUser = repo.findByEmail(email);
 
     if (amount > 0 && amount <= appUser.getBalance()) {
-        appUser.setBalance(appUser.getBalance() - amount); // Retire l'argent du solde
+        appUser.setBalance(appUser.getBalance() - amount);
         repo.save(appUser);
+        
+        transactionService.addTransaction(appUser, "WITHDRAWAL", amount);
+
+        emailService.sendTransactionEmail(
+            appUser.getEmail(),
+            "Confirmation de retrait",
+            "Bonjour " + appUser.getFirstname() + ",\n\nVous avez retiré " + amount + "€ de votre compte.\nVotre nouveau solde est de " + appUser.getBalance() + "€."
+        );
+
         model.addAttribute("successMessage", "Retrait effectué avec succès !");
     } else {
         model.addAttribute("errorMessage", "Montant invalide ou solde insuffisant.");
     }
 
-    model.addAttribute("user", appUser);
     return "redirect:/account/details";
 }
+
+
+@GetMapping("/account/history")
+public String viewHistory(Model model, @AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
+    String email = user.getUsername();
+    AppUser appUser = repo.findByEmail(email);
+
+    List<Transaction> transactions = transactionService.getUserTransactions(appUser);
+    model.addAttribute("transactions", transactions);
+    return "transaction-history"; 
+}
+
 
 
 }
