@@ -18,7 +18,15 @@
         <tr><th>Créé le</th><td th:text="${#dates.format(user.createdAt, 'dd-MM-yyyy HH:mm')}"></td></tr>
         <tr><th>Balance</th><td th:text="${user.balance}"></td></tr> <!-- Ajout de la balance -->
     </table>
-    
+	
+	<div class="text-center mb-4">
+		<img th:if="${user.profileImagePath != null}"
+		     th:src="@{'/uploads/profileImage/' + ${user.profileImagePath}}"
+		     alt="Photo de profil"
+		     style="max-width: 150px; max-height: 150px;">
+
+	</div>
+
     <div class="text-center">
         <a href="/" class="btn btn-secondary">Retour à l'accueil</a>
  	    <a href="/account/deposit" class="btn btn-success me-2">Faire un dépôt</a>

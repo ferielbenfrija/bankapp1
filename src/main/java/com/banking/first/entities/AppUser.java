@@ -26,6 +26,8 @@ private String address;
 private String passworld;
 private String role;
 private Date createdAt;
+@Column(name = "profile_image_path", nullable = true)
+private String profileImagePath;
 @Column(nullable = false)
 private double balance = 0.0; 
 
@@ -99,6 +101,14 @@ public Date getCreatedAt() {
 }
 public void setCreatedAt(Date createdAt) {
 	this.createdAt = createdAt;
+}
+
+public String getProfileImagePath() {
+	return profileImagePath;
+}
+
+public void setProfileImagePath(String profileImagePath) {
+	this.profileImagePath = profileImagePath;
 }
 
 }

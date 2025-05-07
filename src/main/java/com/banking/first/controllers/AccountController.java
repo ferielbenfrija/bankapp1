@@ -1,5 +1,9 @@
 package com.banking.first.controllers;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 
@@ -14,12 +18,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.banking.first.entities.AppUser;
 import com.banking.first.entities.Registerdto;
 import com.banking.first.entities.Transaction;
 import com.banking.first.repositories.UserRepository;
 import com.banking.first.services.TransactionService;
+
 
 import jakarta.validation.Valid;
 
@@ -31,7 +37,7 @@ private UserRepository repo;
 private com.banking.first.services.EmailService emailService;
 	@Autowired
 private TransactionService transactionService;
-
+public static String uploadDirectory=System.getProperty("user.dir")+"/src/main/resources/uploads";
 
 @GetMapping("/register")
 public String register(Model model) {
@@ -42,7 +48,7 @@ public String register(Model model) {
 	return"register";
 }
 @PostMapping("/register")
-public String register(Model model,@Valid @ModelAttribute Registerdto registerdto , BindingResult result) {
+public String register(Model model,@Valid @ModelAttribute Registerdto registerdto , BindingResult result, @RequestParam("profileImage")MultipartFile profileImage) {
 	if (!registerdto.getPassword().equals(registerdto.getConfirmpassword())) { 
 		result.addError( new FieldError ("registerdto", "confirmPassword" ,"Password and Confirm Password do not match")); 
 		} 
@@ -53,8 +59,33 @@ public String register(Model model,@Valid @ModelAttribute Registerdto registerdt
 		
 		if (result.hasErrors()) { 
 			return"register";}
+		//UPLOAD
+		StringBuilder fileName = new StringBuilder();
+
+		// Récupération du fichier unique 
+		MultipartFile file = profileImage;
+
+		// Dossier d'upload
+		String uploadDirectory = "uploads/profileImage";
+
+		// Création du chemin complet du fichier
 		
-		
+		Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
+		fileName.append(file.getOriginalFilename());
+
+		try {
+		    // Créer le dossier s'il n'existe pas
+		    if (!Files.exists(Paths.get(uploadDirectory))) {
+		        Files.createDirectories(Paths.get(uploadDirectory));
+		    }
+
+		    // Écrire le fichier
+		    Files.write(fileNameAndPath, file.getBytes());
+
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+
 try {
 
    var bCryptEncoder = new BCryptPasswordEncoder();
@@ -68,6 +99,7 @@ try {
     newUser.setRole("client");
     newUser.setCreatedAt(new Date());
     newUser.setPassworld(bCryptEncoder.encode(registerdto.getPassword()));
+    newUser.setProfileImagePath(file.getOriginalFilename()); // ✅ Correct
 
     repo.save(newUser);
 
@@ -84,6 +116,7 @@ try {
 public String showAccountDetails(Model model, @AuthenticationPrincipal org.springframework.security.core.userdetails.User user) {
     String email = user.getUsername(); // Récupère l'email de l'utilisateur connecté
     AppUser appUser = repo.findByEmail(email); // Va chercher les infos du user
+    System.out.println("Profile Image Path: " + appUser.getProfileImagePath());  // Débogage
 
     model.addAttribute("user", appUser); // On envoie les infos à la page HTML
     return "account-details"; // Va afficher le fichier account-details.html

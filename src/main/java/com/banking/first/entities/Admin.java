@@ -29,6 +29,7 @@ public class Admin  implements CommandLineRunner {
             admin.setCreatedAt(new Date());
             admin.setPassworld(new BCryptPasswordEncoder().encode("admin123"));
             admin.setBalance(0.0);
+        
             userRepository.save(admin);
             System.out.println("Admin user created.");
         }

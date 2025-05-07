@@ -19,6 +19,7 @@ public class Registerdto {
 	
 	private String phone;
 	private String address;
+	//private String profileImage;//
 	
 	@Size(min=6,message="minimum passworld length is 6 characters")
 	private String password;
@@ -65,4 +66,5 @@ public class Registerdto {
 	public void setConfirmpassword(String confirmpassword) {
 		this.confirmpassword = confirmpassword;
 	}
+
 }
